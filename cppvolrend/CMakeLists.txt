@@ -1,0 +1,66 @@
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs)
+
+#message(${CMAKE_SOURCE_DIR})
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+link_directories(${CMAKE_SOURCE_DIR}/lib)
+
+add_definitions(-DCMAKE_PATH_OUTPUT_DIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+set(PATH_TO_APP_FOLDER ${CMAKE_SOURCE_DIR}/cppvolrend/)
+add_definitions(-DCMAKE_PATH_TO_APP_FOLDER=${PATH_TO_APP_FOLDER})
+
+set(PATH_TO_INCLUDE ${CMAKE_SOURCE_DIR}/include/)
+add_definitions(-DCMAKE_PATH_TO_INCLUDE=${PATH_TO_INCLUDE})
+
+set(PATH_TO_DATA_FOLDER ${CMAKE_SOURCE_DIR}/data/)
+add_definitions(-DCMAKE_PATH_TO_DATA_FOLDER=${PATH_TO_DATA_FOLDER})
+
+# add the executable to be available at ide
+add_executable(cppvolrend
+               main.cpp                                                        defines.h
+               app_freeglut.cpp                                                app_freeglut.h
+               app_glfw.cpp                                                    app_glfw.h
+               renderingmanager.cpp                                            renderingmanager.h
+               # GPU Image Order Ray Casting
+               structured/rc1pass/rc1prenderer.cpp                             structured/rc1pass/rc1prenderer.h
+               )
+
+find_package(OpenGL REQUIRED)
+link_directories(${OPENGL_gl_LIBRARY})
+
+# . Debug
+target_link_libraries(cppvolrend debug ${OPENGL_gl_LIBRARY})
+target_link_libraries(cppvolrend debug freeglut/freeglut)
+target_link_libraries(cppvolrend debug glfw/debug/glfw3)
+target_link_libraries(cppvolrend debug glew/glew32s)
+target_link_libraries(cppvolrend debug glew/glew32)
+target_link_libraries(cppvolrend debug file_utils)
+target_link_libraries(cppvolrend debug gl_utils)
+target_link_libraries(cppvolrend debug vis_utils)
+target_link_libraries(cppvolrend debug volvis_utils)
+# . Release
+target_link_libraries(cppvolrend optimized ${OPENGL_gl_LIBRARY})
+target_link_libraries(cppvolrend optimized freeglut/freeglut)
+target_link_libraries(cppvolrend optimized glfw/release/glfw3)
+target_link_libraries(cppvolrend optimized glew/glew32s)
+target_link_libraries(cppvolrend optimized glew/glew32)
+target_link_libraries(cppvolrend optimized file_utils)
+target_link_libraries(cppvolrend optimized gl_utils)
+target_link_libraries(cppvolrend optimized vis_utils)
+target_link_libraries(cppvolrend optimized volvis_utils)
+
+# add dependency
+add_dependencies(cppvolrend file_utils)
+add_dependencies(cppvolrend gl_utils)
+add_dependencies(cppvolrend vis_utils)
+add_dependencies(cppvolrend volvis_utils)
+# . Debug
+file(COPY "${CMAKE_SOURCE_DIR}/lib/glew/glew32.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Debug")
+file(COPY "${CMAKE_SOURCE_DIR}/lib/freeglut/freeglut.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Debug")
+file(COPY "${CMAKE_SOURCE_DIR}/lib/glfw/glfw3.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Debug")
+
+# . Release
+file(COPY "${CMAKE_SOURCE_DIR}/lib/glew/glew32.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Release")
+file(COPY "${CMAKE_SOURCE_DIR}/lib/freeglut/freeglut.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Release")
+file(COPY "${CMAKE_SOURCE_DIR}/lib/glfw/glfw3.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Release")
