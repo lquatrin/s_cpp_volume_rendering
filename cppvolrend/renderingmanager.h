@@ -72,11 +72,6 @@ protected:
 
 
 private:
-  void ResetGLStateConfig ();
-
-  GLubyte* GetFrontBufferPixelData (bool alpha = true);
-  void SetCurrentVolumeRenderer ();
-
   RayCasting1Pass* curr_vol_renderer;
   vis::RenderingParameters curr_rdr_parameters;
 

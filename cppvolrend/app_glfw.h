@@ -23,12 +23,8 @@ public:
   ~ApplicationGLFW ();
 
   bool Init (int argc, char** argv);
-  bool InitImGui ();
   void MainLoop ();
-  void ImGuiDestroy ();
   void Destroy ();
-
-  const char* GetImGuiglslversion ();
 
   GLFWwindow* GetWindow ()
   {

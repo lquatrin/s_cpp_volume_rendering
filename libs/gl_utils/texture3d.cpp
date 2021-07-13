@@ -77,7 +77,7 @@ namespace gl
 
     // Bind texture
     glBindTexture(GL_TEXTURE_3D, m_textureID);
-
+    
     // Set Data
     glTexImage3D(GL_TEXTURE_3D, 0, internalformat, m_width, m_height, m_depth, 0, format, type, data);
     #if _DEBUG

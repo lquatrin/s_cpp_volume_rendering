@@ -222,36 +222,6 @@ void RenderingManager::PostRedisplay ()
 #endif
 }
 
-void RenderingManager::ResetGLStateConfig ()
-{
-#ifdef USING_FREEGLUT
-  glEnable(GL_CULL_FACE);
-  glEnable(GL_DEPTH_TEST);
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_ONE);
-#endif
-}
-
-GLubyte* RenderingManager::GetFrontBufferPixelData (bool alpha)
-{
-  GLubyte *gl_img_data = new GLubyte[(alpha ? 4 : 3) * curr_rdr_parameters.GetScreenWidth() * curr_rdr_parameters.GetScreenHeight()];
-  
-  glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-  glPushAttrib(GL_PIXEL_MODE_BIT);
-  glReadBuffer(GL_BACK);
-  glFlush();
-  glPixelStorei(GL_PACK_ALIGNMENT, 1);
-  
-  glReadPixels(0, 0, curr_rdr_parameters.GetScreenWidth(), curr_rdr_parameters.GetScreenHeight(), (alpha ? GL_RGBA : GL_RGB), GL_UNSIGNED_BYTE, gl_img_data);
-  
-  glPopAttrib();
-  glPopClientAttrib();
-
-  return gl_img_data;
-}
-
 void RenderingManager::UpdateFrameRate ()
 {
   // Measure speed
@@ -270,16 +240,16 @@ void RenderingManager::UpdateFrameRate ()
   }
 #else
 #ifdef USING_GLFW
-  currentTime = glfwGetTime();
-  nbFrames++;
-  if ((currentTime - lastTime) > 1.0)
+  m_ts_current_time = glfwGetTime();
+  m_ts_n_frames++;
+  if ((m_ts_current_time - m_ts_last_time) > 1.0)
   {
-    double milisec = (currentTime - lastTime) * 1000.0;
-    window_fps = double(nbFrames) * 1000.0 / (currentTime - lastTime);
-    window_ms = 1000.0 / window_fps;
+    double milisec = (m_ts_current_time - m_ts_last_time) * 1000.0;
+    m_ts_window_fps = double(m_ts_n_frames) * 1000.0 / (m_ts_current_time - m_ts_last_time);
+    m_ts_window_ms = 1000.0 / m_ts_window_fps;
 
-    lastTime = currentTime;
-    nbFrames = 0;
+    m_ts_last_time = m_ts_current_time;
+    m_ts_n_frames = 0;
   }
 #endif
 #endif

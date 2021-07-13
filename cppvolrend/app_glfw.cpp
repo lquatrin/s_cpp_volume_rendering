@@ -23,15 +23,10 @@ void ApplicationGLFW::s_MouseButtonCallback (GLFWwindow* window, int button, int
   glfwGetCursorPos(window, &xpos, &ypos);
 
   RenderingManager::Instance()->MouseButton(button, (action + 1) % 2, xpos, ypos);
-
-  // ImGui callback
-  ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 }
 
 void ApplicationGLFW::s_ScrollCallback (GLFWwindow* window, double xoffset, double yoffset)
 {
-  // ImGui callback
-  ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 }
 
 void ApplicationGLFW::s_KeyCallback (GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -57,22 +52,15 @@ void ApplicationGLFW::s_KeyCallback (GLFWwindow* window, int key, int scancode, 
 
     RenderingManager::Instance()->KeyboardUp(key, xpos, ypos);
   }
-
-  // ImGui callback
-  ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 }
 
 void ApplicationGLFW::s_CharCallback (GLFWwindow* window, unsigned int codepoint)
 {
-  // ImGui callback
-  ImGui_ImplGlfw_CharCallback(window, codepoint);
 }
 
 void ApplicationGLFW::s_MouseMotionCallback (GLFWwindow* window, double xpos, double ypos)
 {
-  // If is modifying an imgui widget
-  if (!ImGui::IsAnyWindowFocused())
-    RenderingManager::Instance()->MouseMotion(xpos, ypos);
+  RenderingManager::Instance()->MouseMotion(xpos, ypos);
 }
 
 void ApplicationGLFW::s_WindowSizeCallback (GLFWwindow* window, int w, int h)
@@ -123,16 +111,8 @@ bool ApplicationGLFW::Init (int argc, char** argv)
   glfwMakeContextCurrent(window);
   glfwSwapInterval(use_vsync ? 1 : 0); // Enable vsync
 
-   // Initialize OpenGL loader
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-  bool err = gl3wInit() != 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+  // Initialize OpenGL
   bool err = glewInit() != GLEW_OK;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-  bool err = gladLoadGL() == 0;
-#else
-  bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
-#endif
   if (err)
   {
     fprintf(stderr, "Failed to initialize OpenGL loader!\n");
@@ -152,35 +132,15 @@ bool ApplicationGLFW::Init (int argc, char** argv)
   RenderingManager::Instance()->f_swapbuffer = ApplicationGLFW::glfwSwapBuffer;
   RenderingManager::Instance()->d_swapbuffer = window;
 
+#ifdef USING_FREEGLUT
   if (wglGetSwapIntervalEXT() > 0)
     wglSwapIntervalEXT(1);
+#endif
 
   if (glfwVulkanSupported())
   {
     std::cout << "It seems like vulkan is available" << std::endl;
   }
-
-  return true;
-}
-
-bool ApplicationGLFW::InitImGui ()
-{
-  // Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  //ImGui::StyleColorsClassic();
-
-  // Setup Platform/Renderer bindings
-  // . The initi function gets the current previous glfw callbacks
-  // . use 'false' for manual callback
-  ImGui_ImplGlfw_InitForOpenGL(GetWindow(), false);
-  ImGui_ImplOpenGL3_Init(GetImGuiglslversion());
 
   return true;
 }
@@ -201,21 +161,10 @@ void ApplicationGLFW::MainLoop()
   }
 }
 
-void ApplicationGLFW::ImGuiDestroy ()
-{
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
-}
-
 void ApplicationGLFW::Destroy ()
 {
   glfwDestroyWindow(window);
   glfwTerminate();
 }
 
-const char* ApplicationGLFW::GetImGuiglslversion ()
-{
-  return "#version 130";
-}
 #endif
