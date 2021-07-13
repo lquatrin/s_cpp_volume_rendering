@@ -35,8 +35,7 @@ int main (int argc, char **argv)
   if (!app.Init(argc, argv)) return 1;
 
   RenderingManager::Instance()->InitGL();
-  RenderingManager::Instance()->SetVolumeRenderer(new RayCasting1Pass());
-  
+
   RenderingManager::Instance()->InitData();
 
   app.MainLoop();

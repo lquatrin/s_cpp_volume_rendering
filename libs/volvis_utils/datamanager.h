@@ -67,53 +67,25 @@ namespace vis
     DataManager ();
     ~DataManager ();
 
-    void SetPathToData (std::string s_path_to_data);
-
-    vis::GRID_VOLUME_DATA_TYPE GetInputVolumeDataType ();
-    const char* GetStrVolumeDataType ();
-
     void ReadData ();
 
     // Read data
-    int GetNumberOfStructuredDatasets ();
-    int GetCurrentVolumeIndex ();
-    std::string GetCurrentVolumeName ();
     vis::GridVolume* GetCurrentGridVolume ();
     vis::StructuredGridVolume* GetCurrentStructuredVolume ();
 
     int GetCurrentTransferFunctionIndex ();
-    std::string GetCurrentTransferFunctionName ();
     vis::TransferFunction* GetCurrentTransferFunction ();
-
-    void AddDataLookUpShader (gl::PipelineShader* ext_shader);
-    void AddDataLookUpShader (gl::ComputeShader* ext_shader);
 
     // Processed data
     gl::Texture3D* GetCurrentVolumeTexture ();
-
     gl::Texture3D* GetCurrentGradientTexture ();
 
-    bool SetVolume (std::string name);
-    bool SetCurrentInputVolume (int id);
-
-    bool SetTransferFunction (std::string name);
-    bool SetCurrentTransferFunction (int id);
-
     bool UpdateStructuredGradientTexture ();
-    int GetCurrentGradientGenerationTypeID ();
-    int GetGradientIndex (DataManager::STRUCTURED_GRADIENT_TYPE sgt);
-    bool SetCurrentGradient (int idx);
-    std::string GetGradientName (DataManager::STRUCTURED_GRADIENT_TYPE sgt);
-    std::string CurrentGradientName ();
-    std::vector<std::string> GetGradientGenerationTypeStrList ();
  
     void DeleteVolumeData ();
     void DeleteTransferFunctionData ();
     void DeleteGradientData ();
   protected:
-
-    void ReadStructuredDatasetsFromRes ();
-    void ReadTransferFunctionsFromRes ();
 
     bool GenerateStructuredVolumeTexture ();
     bool GenerateStructuredGradientTexture ();
@@ -124,13 +96,6 @@ namespace vis
     //  new rgb texture using glTexImage3D 
     gl::Texture3D* GenerateGradientWithComputeShader ();
     
-    vis::GRID_VOLUME_DATA_TYPE curr_vol_data_type;
-    bool use_specific_lookup_data_shader;
-
-    // structured, unstructured and transfer function list...
-    std::vector<DataReference> stored_structured_datasets;
-    std::vector<DataReference> stored_transfer_functions;
-
     // structured datasets
     vis::StructuredGridVolume* curr_vr_volume;
     gl::Texture3D* curr_gl_tex_structured_volume;
@@ -138,13 +103,8 @@ namespace vis
     // transfer function
     vis::TransferFunction* curr_vr_transferfunction;
 
-    int curr_volume_index;
-    int curr_transferfunction_index;
-
     STRUCTURED_GRADIENT_TYPE curr_gradient_comp_model;
     gl::Texture3D* curr_gl_tex_structured_gradient;
-
-    std::string m_path_to_data;
   private:
 
   };

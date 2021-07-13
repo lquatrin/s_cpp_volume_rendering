@@ -11,27 +11,20 @@
 #include <vis_utils/defines.h>
 #include <volvis_utils/utils.h>
 
-
 #include <volvis_utils/reader.h>
+
+#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/raw/Bonsai.1.256x256x256.raw"
+#define _DATA_TRANSFER_FUNCTION "S:/github/s_cpp_volume_rendering/data/tf1dcp/bonsai_01.tf1d"
 
 namespace vis
 {
   DataManager::DataManager ()
-    : curr_vol_data_type(vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    , use_specific_lookup_data_shader(false)
-    , curr_vr_volume(nullptr)
+    : curr_vr_volume(nullptr)
     , curr_vr_transferfunction(nullptr)
-    , curr_volume_index(0)
-    , curr_transferfunction_index(0)
     , curr_gradient_comp_model(DataManager::STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL)
     , curr_gl_tex_structured_volume(nullptr)
     , curr_gl_tex_structured_gradient(nullptr)
   {
-    // structured, unstructured and transfer function list...
-    stored_structured_datasets.clear();
-    stored_transfer_functions.clear();
-    
-    m_path_to_data = "";
   }
 
   DataManager::~DataManager ()
@@ -40,68 +33,18 @@ namespace vis
     DeleteTransferFunctionData();
   }
 
-  void DataManager::SetPathToData (std::string s_path_to_data)
-  {
-    m_path_to_data = s_path_to_data;
-  }
-
-  vis::GRID_VOLUME_DATA_TYPE DataManager::GetInputVolumeDataType ()
-  {
-    return curr_vol_data_type;
-  }
-  
-  const char* DataManager::GetStrVolumeDataType ()
-  {
-    if (GetInputVolumeDataType() == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-      return "Structured";
-    else if (GetInputVolumeDataType() == vis::GRID_VOLUME_DATA_TYPE::UNSTRUCTURED)
-      return "Unstructured";
-    return "None";
-  }
-
   void DataManager::ReadData ()
   {
-    stored_structured_datasets.clear();
-    stored_transfer_functions.clear();
-
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-      ReadStructuredDatasetsFromRes();
-
-    ReadTransferFunctionsFromRes();
-
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      GenerateStructuredVolumeTexture();
-    }
+    GenerateStructuredVolumeTexture();
     
     vis::TransferFunctionReader tfr;
-    curr_vr_transferfunction = tfr.ReadTransferFunction(stored_transfer_functions[GetCurrentTransferFunctionIndex()].path);
-    curr_vr_transferfunction->SetName(stored_transfer_functions[GetCurrentTransferFunctionIndex()].name);
-  }
-
-  int DataManager::GetNumberOfStructuredDatasets ()
-  {
-    return stored_structured_datasets.size();
-  }
-
-  int DataManager::GetCurrentVolumeIndex ()
-  {
-    return curr_volume_index;
-  }
-
-  std::string DataManager::GetCurrentVolumeName ()
-  {
-    if (GetInputVolumeDataType() == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      return stored_structured_datasets[GetCurrentVolumeIndex()].name;
-    }
-    return "";
+    curr_vr_transferfunction = tfr.ReadTransferFunction(_DATA_TRANSFER_FUNCTION);
+    curr_vr_transferfunction->SetName("transfer_function");
   }
 
   vis::GridVolume* DataManager::GetCurrentGridVolume ()
   {
-    if (GetInputVolumeDataType() == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-      return curr_vr_volume;
+    return curr_vr_volume;
   }
 
   vis::StructuredGridVolume* DataManager::GetCurrentStructuredVolume ()
@@ -112,39 +55,6 @@ namespace vis
   vis::TransferFunction* DataManager::GetCurrentTransferFunction ()
   {
     return curr_vr_transferfunction;
-  }
-
-  void DataManager::AddDataLookUpShader (gl::PipelineShader* ext_shader)
-  {
-    if (GetInputVolumeDataType() == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      //return stored_structured_datasets[GetCurrentVolumeIndex()].name;
-    }
-  }
-
-  void DataManager::AddDataLookUpShader (gl::ComputeShader* ext_shader)
-  {
-    if (GetInputVolumeDataType() == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (use_specific_lookup_data_shader)
-      {
-        ext_shader->AddShaderFile(std::string(vis::Utils::GetShaderPath() + "_data_lookup/structured_8bits.comp"));
-      }
-      else
-      {
-        ext_shader->AddShaderFile(std::string(vis::Utils::GetShaderPath() + "_data_lookup/structured_half_float.comp"));
-      }
-    }
-  }
-
-  int DataManager::GetCurrentTransferFunctionIndex ()
-  {
-    return curr_transferfunction_index;
-  }
-  
-  std::string DataManager::GetCurrentTransferFunctionName ()
-  {
-    return stored_transfer_functions[GetCurrentTransferFunctionIndex()].name;
   }
 
   gl::Texture3D* DataManager::GetCurrentVolumeTexture ()
@@ -183,82 +93,12 @@ namespace vis
     curr_vr_transferfunction = nullptr;
   }
 
-  void DataManager::ReadStructuredDatasetsFromRes ()
-  {
-    std::string line;
-    std::string model_read_filename = m_path_to_data;
-    model_read_filename.append("/#list_structured_datasets");
-    std::ifstream f_openmodels(model_read_filename);
-    
-    if (!f_openmodels.is_open())
-    {
-      std::cout << "Error: Unable to read vol rendering datasets." << std::endl;
-      exit(EXIT_FAILURE);
-    }
-    
-    std::cout << "Reading structured datasets..." << std::endl;
-    while (!f_openmodels.eof())
-    {
-      line.clear();
-      std::getline(f_openmodels, line);
-    
-      int start_path = line.find_first_of("<") + 1;
-      int end_path = line.find_first_of(">");
-    
-      int start_name = line.find_last_of("<") + 1;
-      int end_name = line.find_last_of(">");
-    
-      stored_structured_datasets.push_back(DataReference(
-        line.substr(start_path, end_path - start_path),
-        line.substr(start_name, end_name - start_name),
-        m_path_to_data
-      ));
-    }
-    f_openmodels.close();
-    
-    curr_volume_index = 0;
-  }
-
-  void DataManager::ReadTransferFunctionsFromRes ()
-  {
-    std::string line;
-    std::string tfunc_read_filename = m_path_to_data;
-    tfunc_read_filename.append("/#list_transfer_functions");
-    std::ifstream f_opentransferfunctions(tfunc_read_filename);
-    
-    if (!f_opentransferfunctions.is_open())
-    {
-      std::cout << "Error: Unable to read vol rendering transfer functions." << std::endl;
-      exit(EXIT_FAILURE);
-    }
-    
-    std::cout << "Reading Transfer Functions...";
-    while (!f_opentransferfunctions.eof())
-    {
-      line.clear();
-      std::getline(f_opentransferfunctions, line);
-    
-      int start_path = line.find_first_of("<") + 1;
-      int end_path = line.find_first_of(">");
-    
-      int start_name = line.find_last_of("<") + 1;
-      int end_name = line.find_last_of(">");
-    
-      stored_transfer_functions.push_back(DataReference(
-        line.substr(start_path, end_path - start_path),
-        line.substr(start_name, end_name - start_name),
-        m_path_to_data
-      ));
-    }
-    f_opentransferfunctions.close();
-  }
-
   bool DataManager::GenerateStructuredVolumeTexture ()
   {
     // Read Volume
     vis::VolumeReader vr;
-    curr_vr_volume = vr.ReadStructuredVolume(stored_structured_datasets[GetCurrentVolumeIndex()].path);
-    curr_vr_volume->SetName(stored_structured_datasets[GetCurrentVolumeIndex()].name);
+    curr_vr_volume = vr.ReadStructuredVolume(_DATA_VOLUME_PATH);
+    curr_vr_volume->SetName("volume");
 
     // Generate Volume Texture
     curr_gl_tex_structured_volume = vis::GenerateRTexture(curr_vr_volume, 0, 0, 0, curr_vr_volume->GetWidth(),
@@ -292,191 +132,12 @@ namespace vis
     return true;
   }
 
-  bool DataManager::SetVolume (std::string name)
-  {
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      for(int i = 0; i < stored_structured_datasets.size(); i++)
-      {
-        if (stored_structured_datasets[i].name.compare(name) == 0)
-        {
-          curr_volume_index = i;
-          DeleteVolumeData();
-
-          GenerateStructuredVolumeTexture();
-
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool DataManager::SetCurrentInputVolume (int id)
-  {
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (id < stored_structured_datasets.size())
-      {
-        curr_volume_index = id;
-        DeleteVolumeData();
-        GenerateStructuredVolumeTexture();
-        return true;
-      }
-    }
-    return false;
-  }
-  
-  bool DataManager::SetTransferFunction (std::string name)
-  {
-    for (int i = 0; i < stored_transfer_functions.size(); i++)
-    {
-      if (stored_transfer_functions[i].name.compare(name) == 0)
-      {
-        curr_transferfunction_index = i;
-        DeleteTransferFunctionData();
-
-        vis::TransferFunctionReader tfr;
-        curr_vr_transferfunction = tfr.ReadTransferFunction(stored_transfer_functions[curr_transferfunction_index].path);
-        curr_vr_transferfunction->SetName(stored_transfer_functions[curr_transferfunction_index].name);
-
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool DataManager::SetCurrentTransferFunction (int id)
-  {
-    if (id < stored_transfer_functions.size())
-    {
-      curr_transferfunction_index = id;
-      DeleteTransferFunctionData();
-
-      vis::TransferFunctionReader tfr;
-      curr_vr_transferfunction = tfr.ReadTransferFunction(stored_transfer_functions[curr_transferfunction_index].path);
-      curr_vr_transferfunction->SetName(stored_transfer_functions[curr_transferfunction_index].name);
-
-      return true;
-    }
-    return false;
-  }
-  
   bool DataManager::UpdateStructuredGradientTexture ()
   {
     DeleteGradientData();
     return GenerateStructuredGradientTexture();
   }
   
-  int DataManager::GetCurrentGradientGenerationTypeID ()
-  {
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::SOBEL_FELDMAN_FILTER)
-      {
-        return 0;
-      }
-      else if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::FINITE_DIFERENCES)
-      {
-        return 1;
-      }
-      else if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL)
-      {
-        return 2;
-      }
-      else if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::NONE_GRADIENT)
-      {
-        return 3;
-      }
-    }
-    return -1;
-  }
-
-  int DataManager::GetGradientIndex (DataManager::STRUCTURED_GRADIENT_TYPE sgt)
-  {
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (sgt == STRUCTURED_GRADIENT_TYPE::SOBEL_FELDMAN_FILTER)
-        return 0;
-      else if (sgt == STRUCTURED_GRADIENT_TYPE::FINITE_DIFERENCES)
-        return 1;
-      else if (sgt == STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL)
-        return 2;
-      else
-        return 3;
-    }
-    return -1;
-  }
-
-  bool DataManager::SetCurrentGradient (int idx)
-  {
-    STRUCTURED_GRADIENT_TYPE sgt = STRUCTURED_GRADIENT_TYPE::NONE_GRADIENT;
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (idx == 0)
-        sgt = STRUCTURED_GRADIENT_TYPE::SOBEL_FELDMAN_FILTER;
-      else if (idx == 1)
-        sgt = STRUCTURED_GRADIENT_TYPE::FINITE_DIFERENCES;
-      else if (idx == 2)
-        sgt = STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL;
-    }
-
-    bool ret = !(sgt == curr_gradient_comp_model);
-    if (ret) curr_gradient_comp_model = sgt;
-  
-    return ret;
-  }
-
-  std::string DataManager::GetGradientName (DataManager::STRUCTURED_GRADIENT_TYPE sgt)
-  {
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (sgt == STRUCTURED_GRADIENT_TYPE::SOBEL_FELDMAN_FILTER)
-      {
-        return "Sobel-Feldman";
-      }
-      else if (sgt == STRUCTURED_GRADIENT_TYPE::FINITE_DIFERENCES)
-      {
-        return "Finite Diferences";
-      }
-      else if (sgt == STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL)
-      {
-        return "Sobel-Feldman (Compute Shader)";
-      }
-    }
-    return "None";
-  }
-
-  std::string DataManager::CurrentGradientName ()
-  {
-    if (curr_vol_data_type == vis::GRID_VOLUME_DATA_TYPE::STRUCTURED)
-    {
-      if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::SOBEL_FELDMAN_FILTER)
-      {
-        return "Sobel-Feldman";
-      }
-      else if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::FINITE_DIFERENCES)
-      {
-        return "Finite Diferences";
-      }
-      else if (curr_gradient_comp_model == STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL)
-      {
-        return "Sobel-Feldman (Compute Shader)";
-      }
-    }
-    return "NULL";
-  }
-  
-  std::vector<std::string> DataManager::GetGradientGenerationTypeStrList ()
-  {
-    std::vector<std::string> vlist;
-    vlist.push_back(GetGradientName(STRUCTURED_GRADIENT_TYPE::SOBEL_FELDMAN_FILTER));
-    vlist.push_back(GetGradientName(STRUCTURED_GRADIENT_TYPE::FINITE_DIFERENCES));
-    vlist.push_back(GetGradientName(STRUCTURED_GRADIENT_TYPE::COMPUTE_SHADER_SOBEL));
-    vlist.push_back(GetGradientName(STRUCTURED_GRADIENT_TYPE::NONE_GRADIENT));
-    return vlist;
-  }
-
   gl::Texture3D* DataManager::GenerateGradientWithComputeShader ()
   {
     // Get Current Volume

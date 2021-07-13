@@ -43,8 +43,6 @@ public:
   void InitGL ();
   void InitData ();
 
-  void SetVolumeRenderer (RayCasting1Pass* volrend);
-
   void Display ();
   void Reshape (int w, int h);
   void Keyboard (unsigned char key, int x, int y);
@@ -54,9 +52,6 @@ public:
   void CloseFunc ();
   void IdleFunc ();
   void PostRedisplay ();
-
-  // Update the volume renderer with the current volume and transfer function
-  void UpdateDataAndResetCurrentVRMode ();
 
   unsigned int GetScreenWidth ()
   {

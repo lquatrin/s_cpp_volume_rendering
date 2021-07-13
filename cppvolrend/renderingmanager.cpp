@@ -98,16 +98,10 @@ void RenderingManager::InitGL()
   //std::cout << max << std::endl;
 }
 
-void RenderingManager::SetVolumeRenderer (RayCasting1Pass* bvolrend)
-{
-  curr_vol_renderer = bvolrend;
-}
-
 // Init glew + camera + curr vol renderer
 void RenderingManager::InitData ()
 {
   // Read Datasets and Transfer Functions from Data Manager
-  m_data_mgr.SetPathToData(MAKE_STR(CMAKE_PATH_TO_DATA_FOLDER));
   m_data_mgr.ReadData();
  
   // Read camera states and set first camera data
@@ -118,11 +112,11 @@ void RenderingManager::InitData ()
 
   curr_rdr_parameters.GetCamera()->SetData(&c_data);
 
+  curr_vol_renderer = new RayCasting1Pass();
   // Set auxiliar data parameter classes for each rendering mode
   curr_vol_renderer->SetExternalResources(&m_data_mgr, &curr_rdr_parameters);
-
   // Update rendering mode
-  SetCurrentVolumeRenderer();
+  curr_vol_renderer->Init(curr_rdr_parameters.GetScreenWidth(), curr_rdr_parameters.GetScreenHeight());
  
   // Reshape
   Reshape(curr_rdr_parameters.GetScreenWidth(), curr_rdr_parameters.GetScreenHeight());
@@ -134,9 +128,7 @@ void RenderingManager::Display ()
   UpdateFrameRate();
  
   if (curr_rdr_parameters.GetCamera()->UpdatePositionAndRotations())
-  {
     curr_vol_renderer->SetOutdated();
-  }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -230,12 +222,6 @@ void RenderingManager::PostRedisplay ()
 #endif
 }
 
-// Update the volume renderer with the current volume and transfer function
-void RenderingManager::UpdateDataAndResetCurrentVRMode ()
-{
-  curr_vol_renderer->Init(curr_rdr_parameters.GetScreenWidth(), curr_rdr_parameters.GetScreenHeight());
-}
-
 void RenderingManager::ResetGLStateConfig ()
 {
 #ifdef USING_FREEGLUT
@@ -264,12 +250,6 @@ GLubyte* RenderingManager::GetFrontBufferPixelData (bool alpha)
   glPopClientAttrib();
 
   return gl_img_data;
-}
-
-// Set current volume renderer
-void RenderingManager::SetCurrentVolumeRenderer ()
-{
-  UpdateDataAndResetCurrentVRMode();
 }
 
 void RenderingManager::UpdateFrameRate ()
