@@ -39,10 +39,67 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 layout (rgba16f, binding = 0) uniform image2D OutputFrag;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// From _structured_volume_data/ray_bbox_intersection.frag
-struct Ray { vec3 Origin; vec3 Dir; };
+// ray_bbox_intersection
+struct Ray {
+  vec3 Origin;
+  vec3 Dir;
+};
+
+bool IntersectBox (Ray r, vec3 boxmin, vec3 boxmax, out float tnear, out float tfar)
+{
+  vec3 invR = vec3(1.0) / r.Dir;
+  
+  vec3 tbbmin = invR * (boxmin - r.Origin);
+  vec3 tbbmax = invR * (boxmax - r.Origin);
+   
+  vec3 tmin = min(tbbmin, tbbmax);
+  vec3 tmax = max(tbbmin, tbbmax);
+  
+  tnear = max(max(tmin.x, tmin.y), tmin.z);
+  tfar  = min(min(tmax.x, tmax.y), tmax.z);
+
+  return tfar > tnear;
+}
+
 bool RayAABBIntersection (vec3 vert_eye, vec3 vert_dir, vec3 vol_scaled_dim,
-                          out Ray r, out float rtnear, out float rtfar);
+                          out Ray r, out float rtnear, out float rtfar)
+{
+  vec3 aabbmin = -vol_scaled_dim * 0.5;
+  vec3 aabbmax =  vol_scaled_dim * 0.5;
+
+  r.Origin = vert_eye;
+  r.Dir = normalize(vert_dir);
+  
+  float tnear, tfar;
+  bool hit = IntersectBox(r, aabbmin, aabbmax, tnear, tfar);
+
+  tnear = max(tnear, 0.0);
+
+  rtnear = tnear;
+  rtfar  = tfar;
+
+  return hit;
+}
+
+bool RayAABBIntersection (vec3 vert_eye, vec3 vert_dir, vec3 gridmin, vec3 gridmax,
+                          out Ray r, out float rtnear, out float rtfar)
+{
+  vec3 aabbmin = gridmin;
+  vec3 aabbmax = gridmax;
+
+  r.Origin = vert_eye;
+  r.Dir = normalize(vert_dir);
+  
+  float tnear, tfar;
+  bool hit = IntersectBox(r, aabbmin, aabbmax, tnear, tfar);
+
+  tnear = max(tnear, 0.0);
+
+  rtnear = tnear;
+  rtfar  = tfar;
+
+  return hit;
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 vec3 ShadeBlinnPhong (vec3 Tpos, vec3 clr)

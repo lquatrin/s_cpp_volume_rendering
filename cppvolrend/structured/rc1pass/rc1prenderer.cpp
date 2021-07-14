@@ -196,7 +196,6 @@ void RayCasting1Pass::CreateRenderingPass ()
   glm::vec3 vol_aabb = vol_resolution * vol_voxelsize;
  
   cp_shader_rendering = new gl::ComputeShader();
-  cp_shader_rendering->AddShaderFile(CPPVOLREND_DIR"structured/_common_shaders/ray_bbox_intersection.comp");
   cp_shader_rendering->AddShaderFile(CPPVOLREND_DIR"structured/rc1pass/ray_marching_1p.comp");
   cp_shader_rendering->LoadAndLink();
   cp_shader_rendering->Bind();

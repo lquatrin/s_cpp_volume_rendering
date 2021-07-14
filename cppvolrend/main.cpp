@@ -35,11 +35,9 @@ int main (int argc, char **argv)
   if (!app.Init(argc, argv)) return 1;
 
   RenderingManager::Instance()->InitGL();
-
   RenderingManager::Instance()->InitData();
 
   app.MainLoop();
-
   app.Destroy();
 
   return 0;
