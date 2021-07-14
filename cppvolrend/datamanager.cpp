@@ -13,8 +13,8 @@
 
 #include <volvis_utils/reader.h>
 
-//#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/raw/Bonsai.1.256x256x256.raw"
-#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/vollib/Engine.pvm"
+#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/raw/Bonsai.1.256x256x256.raw"
+//#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/vollib/Engine.pvm"
 #define _DATA_TRANSFER_FUNCTION "S:/github/s_cpp_volume_rendering/data/tf1dcp/bonsai_01.tf1d"
 
 namespace vis

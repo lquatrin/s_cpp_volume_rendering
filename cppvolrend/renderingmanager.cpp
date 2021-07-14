@@ -174,6 +174,18 @@ void RenderingManager::Keyboard (unsigned char key, int x, int y)
 void RenderingManager::KeyboardUp(unsigned char key, int x, int y)
 {
   curr_rdr_parameters.GetCamera()->KeyboardUp(key, x, y);
+  switch (key)
+  {
+  case 'l':
+    curr_rdr_parameters.SetBlinnPhongLightingPosition(curr_rdr_parameters.GetCamera()->GetEye());
+    curr_rdr_parameters.SetBlinnPhongLightSourceCameraVectors(
+      curr_rdr_parameters.GetCamera()->GetZAxis(), 
+      curr_rdr_parameters.GetCamera()->GetYAxis(), 
+      curr_rdr_parameters.GetCamera()->GetXAxis()
+    );
+    curr_vol_renderer->SetOutdated();
+    break;
+  }
   PostRedisplay();
 }
 
