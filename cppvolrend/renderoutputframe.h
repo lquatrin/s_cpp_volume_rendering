@@ -47,8 +47,6 @@ private:
   void CreateVertexBuffers ();
 
   gl::Texture2D* m_screen_output;
-
-  std::string m_shader_folder;
   gl::PipelineShader* m_ps_shader;
 
   gl::ArrayObject* m_cb_vao;

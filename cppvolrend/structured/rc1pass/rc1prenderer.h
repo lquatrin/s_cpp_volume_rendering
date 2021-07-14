@@ -14,13 +14,13 @@
 #ifndef SINGLE_PASS_VOLUME_RENDERING_RAY_CASTING_H
 #define SINGLE_PASS_VOLUME_RENDERING_RAY_CASTING_H
 
-#include <volvis_utils/datamanager.h>
-#include <volvis_utils/renderingparameters.h>
+#include "../../datamanager.h"
+#include "../../renderingparameters.h"
+#include "../../renderoutputframe.h"
 #include <volvis_utils/structuredgridvolume.h>
 #include <volvis_utils/transferfunction.h>
 
-#include <vis_utils/camera.h>
-#include <vis_utils/renderoutputframe.h>
+#include <volvis_utils/camera.h>
 
 #include <gl_utils/texture1d.h>
 #include <gl_utils/texture2d.h>

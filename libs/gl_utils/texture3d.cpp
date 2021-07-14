@@ -3,15 +3,6 @@
 
 #include <GL/glew.h>
 
-//http://renderingpipeline.com/2012/03/partially-resident-textures-amd_sparse_texture/
-//https://www.opengl.org/registry/specs/ARB/sparse_texture.txt
-//http://www.tinysg.de/techGuides/tg4_prt.html
-
-//http://stackoverflow.com/questions/9224300/what-does-gltexstorage-do
-//http://www.ecse.rpi.edu/~wrf/wiki/ComputerGraphicsFall2013/SuperBible/SB6/code/src/
-//http://holger.dammertz.org/stuff/notes_VirtualTexturing.html
-//http://stackoverflow.com/questions/24146011/what-are-the-limits-of-texture-array-size
-
 namespace gl
 {
   Texture3D::Texture3D (unsigned int width, unsigned int height, unsigned int depth)

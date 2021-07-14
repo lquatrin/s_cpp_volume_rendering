@@ -16,7 +16,7 @@
 #include <gl_utils/texture2d.h>
 #include <gl_utils/texture3d.h>
 
-#include <vis_utils/camera.h>
+#include <volvis_utils/camera.h>
 
 #define USING_IMGUI
 

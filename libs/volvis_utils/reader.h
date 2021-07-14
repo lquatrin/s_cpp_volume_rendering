@@ -30,9 +30,7 @@ namespace vis
   
   protected:
     StructuredGridVolume* readpvm (std::string filename);
-    StructuredGridVolume* readpvmold (std::string filename);
     StructuredGridVolume* readraw (std::string filepath);
-    StructuredGridVolume* readsyn (std::string filepath);
 
   private:
 

@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/norm.hpp>
 
-#include <vis_utils/camera.h>
+#include <volvis_utils/camera.h>
 
 #include <volvis_utils/utils.h>
 
@@ -19,7 +19,7 @@ RayCasting1Pass::RayCasting1Pass ()
   , cp_shader_rendering(nullptr)
   , m_u_step_size(0.5f)
   , m_apply_gradient_shading(true)
-  , m_rdr_frame_to_screen(CPPVOLREND_DIR"../../libs/vis_utils/shader/")
+  , m_rdr_frame_to_screen(CPPVOLREND_DIR)
 {
   SetBuilt(false);
   SetOutdated();

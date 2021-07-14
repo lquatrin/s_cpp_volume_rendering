@@ -10,13 +10,13 @@
 #include <gl_utils/arrayobject.h>
 #include <gl_utils/pipelineshader.h>
 
-#include <vis_utils/camera.h>
+#include <volvis_utils/camera.h>
 
 #include <glm/glm.hpp>
 #include <vector>
 
-#include <volvis_utils/datamanager.h>
-#include <volvis_utils/renderingparameters.h>
+#include "datamanager.h"
+#include "renderingparameters.h"
 
 class RayCasting1Pass;
 

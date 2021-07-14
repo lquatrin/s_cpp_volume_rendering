@@ -5,7 +5,6 @@
 #include "reader.h"
 
 #include <file_utils/pvm.h>
-#include <file_utils/pvm_old.h>
 #include <file_utils/rawloader.h>
 
 #include <fstream>
@@ -35,14 +34,8 @@ namespace vis
     if (extension.compare("pvm") == 0) {
       ret = readpvm(filepath);
     }
-    else if (extension.compare("pvmold") == 0) {
-      ret = readpvmold(filepath);
-    }
     else if (extension.compare("raw") == 0) {
       ret = readraw(filepath);
-    }
-    else if (extension.compare("syn") == 0) {
-      ret = readsyn(filepath);
     }
     printf("DONE\n");
 
@@ -203,152 +196,6 @@ namespace vis
     }
     else {
       printf("Finished -> Error on opening .raw file\n");
-    }
-
-    return sg_ret;
-  }
-
-  StructuredGridVolume* VolumeReader::readpvmold (std::string filename)
-  {
-    StructuredGridVolume* ret = nullptr;
-  
-    printf("Started  -> Read Volume From .pvmold File\n");
-    printf("  - File .pvmold Path: %s\n", filename.c_str());
-  
-    unsigned int width, height, depth, components;
-    double scalex, scaley, scalez;
-
-    PvmOld fpvm(filename.c_str());
-    fpvm.GetDimensions(&width, &height, &depth);
-    components = fpvm.GetComponents();
-    fpvm.GetScale(&scalex, &scaley, &scalez);
-
-    // Get Volume Data
-    float* vol_data = 
-      //fpvm.GetData()
-      fpvm.GenerateReescaledMinMaxData()
-    ;
-
-    double max_density = 1.0;
-    if (components == 1)
-      max_density = (256.0 - 1.0);
-    else if (components == 2)
-      max_density = (65536.0 - 1.0);
-
-    double* aux_output_data = new double[width * height * depth];
-    for (int i = 0; i < width * height * depth; i++)
-      aux_output_data[i] = (double)vol_data[i];
-
-    GLfloat* scalar_values = new GLfloat[width * height * depth];
-    for (int i = 0; i < width * height * depth; i++)
-      scalar_values[i] = ((GLfloat)((int)aux_output_data[i]) / max_density);
-
-    assert(components > 0);
-
-    delete[] vol_data;
-    delete[] aux_output_data;
-
-    ret = new StructuredGridVolume(filename, width, height, depth);
-    ret->SetScale(scalex, scaley, scalez);
-    ret->SetName(filename);
-
-    // We won't delete the vol_data, because it will be stored at 
-    //   structured grid volume...
-    ret->SetArrayData(scalar_values, vis::DataStorageSize::_NORMALIZED_F);
-
-    printf("  - Volume Name     : %s\n", filename.c_str());
-    printf("  - Volume Size     : [%d, %d, %d]\n", width, height, depth);
-
-    printf("Finished -> Read Volume From .pvmold File\n");
-    
-    return ret;
-  }
-
-  StructuredGridVolume* VolumeReader::readsyn (std::string filepath)
-  {
-    StructuredGridVolume* sg_ret = nullptr;
-
-    printf("Started  -> Read Volume From .syn File\n");
-    printf("  - File .syn Path: %s\n", filepath.c_str());
-
-    std::ifstream iffile(filepath.c_str());
-    if (iffile.is_open())
-    {
-      int width, height, depth;
-      iffile >> width >> height >> depth;
-      std::cout << "  - Volume Size: [" << width << ", " << height << ", " << depth << "]" << std::endl;
-  
-      sg_ret = new StructuredGridVolume(filepath, width, height, depth);
-      sg_ret->SetScale(1.0, 1.0, 1.0);
-      sg_ret->SetName(filepath);
-      
-      unsigned char* syn_data = new unsigned char[width*height*depth];
-
-      
-      int new_data = 0;
-      while (iffile >> new_data)
-      {
-        if (new_data == 1)
-        {
-          int x0, y0, z0, x1, y1, z1, v;
-          iffile >> x0 >> y0 >> z0 >> x1 >> y1 >> z1 >> v;
-          for (int x = x0; x < x1; x++)
-          {
-            for (int y = y0; y < y1; y++)
-            {
-              for (int z = z0; z < z1; z++)
-              {
-                syn_data[x + (width * y) + (width * height * z)] = unsigned char(v);
-              }
-            }
-          }
-        }
-        //else if (new_data == 2)
-        //{
-        //  int x0, y0, z0, x1, y1, z1, v, d;
-        //  iffile >> x0 >> y0 >> z0 >> x1 >> y1 >> z1 >> v >> d;
-        //  for (int x = x0; x < x1; x++)
-        //  {
-        //    for (int y = y0; y < y1; y++)
-        //    {
-        //      for (int z = z0; z < z1; z++)
-        //      {
-        //        glm::vec3 dv(x1 - x0, y1 - y0, z1 - z0);
-        //        dv = glm::normalize(dv);
-        //
-        //        glm::vec3 ap = glm::vec3(x, y, z) - glm::vec3(x0, y0, z0);
-        //
-        //        glm::vec3 apdv = glm::vec3(ap.y*dv.z - ap.z*dv.y,
-        //                                   ap.z*dv.x - ap.x*dv.z,
-        //                                   ap.x*dv.y - ap.y*dv.x);
-        //
-        //        float dist = glm::sqrt(apdv.x * apdv.x + apdv.y * apdv.y + apdv.z * apdv.z);
-        //        if (dist < d)
-        //          sync_data[x + (width)*y + (width * height) * z] = GLubyte(v);
-        //      }
-        //    }
-        //  }
-        //}
-        else
-        {
-          int xt, yt, zt, v;
-          iffile >> xt >> yt >> zt >> v;
-          syn_data[xt + (width * yt) + (width * height * zt)] = unsigned char(v);
-        }
-      }
-      
-      // We won't delete the scalar_values, because it will be stored at 
-      //   structured grid volume...
-      sg_ret->SetArrayData(syn_data, vis::DataStorageSize::_8_BITS);
-
-      printf("  - Volume Name     : %s\n", filepath.c_str());
-      printf("  - Volume Size     : [%d, %d, %d]\n", width, height, depth);
-
-      iffile.close();
-      printf("Finished -> Read Volume From .syn File\n");
-    }
-    else {
-      printf("Finished -> Error on opening .syn file\n");
     }
 
     return sg_ret;

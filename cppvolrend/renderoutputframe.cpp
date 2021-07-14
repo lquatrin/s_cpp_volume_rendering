@@ -2,7 +2,6 @@
 
 #include <gl_utils/texture2d.h>
 #include <gl_utils/pipelineshader.h>
-#include <vis_utils/defines.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -16,7 +15,6 @@ namespace vis
 
 RenderFrameToScreen::RenderFrameToScreen(std::string shader_folder)
   : m_screen_output(nullptr)
-  , m_shader_folder(shader_folder)
   , m_ps_shader(nullptr)
   , m_cb_vao(nullptr)
   , m_cb_vbo(nullptr)
@@ -32,7 +30,6 @@ RenderFrameToScreen::~RenderFrameToScreen ()
 void RenderFrameToScreen::Clean ()
 {
   ClearTextures();
-
   ClearShaders();
 
   if (m_cb_vao) delete m_cb_vao;
@@ -125,8 +122,8 @@ void RenderFrameToScreen::Draw (GLuint screen_output_id)
     // Shader to blend the rendered frame to the output screen (used by compute shaders)
     m_ps_shader = new gl::PipelineShader();
 
-    m_ps_shader->AddShaderFile(gl::PipelineShader::TYPE::VERTEX, vis::Utils::GetShaderPath() + "blendframe_render.vert");
-    m_ps_shader->AddShaderFile(gl::PipelineShader::TYPE::FRAGMENT, vis::Utils::GetShaderPath() + "blendframe_render.frag");
+    m_ps_shader->AddShaderFile(gl::PipelineShader::TYPE::VERTEX, CPPVOLREND_DIR"structured/_common_shaders/blendframe_render.vert");
+    m_ps_shader->AddShaderFile(gl::PipelineShader::TYPE::FRAGMENT, CPPVOLREND_DIR"structured/_common_shaders/blendframe_render.frag");
     m_ps_shader->LoadAndLink();
     m_ps_shader->Bind();
     gl::ExitOnGLError("vis::RenderFrameToScreen: Could not create pipeline blend shader...");

@@ -10,7 +10,7 @@
  * Leonardo Quatrin Campagnolo
  * . campagnolo.lq@gmail.com
 **/
-#include <volvis_utils/renderingparameters.h>
+#include "renderingparameters.h"
 
 namespace vis
 {

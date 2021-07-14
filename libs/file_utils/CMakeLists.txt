@@ -1,5 +1,4 @@
-add_library(file_utils STATIC pvm_old.cpp            pvm_old.h
-                              pvm.cpp                pvm.h
+add_library(file_utils STATIC pvm.cpp                pvm.h
                               rawloader.cpp          rawloader.h)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)

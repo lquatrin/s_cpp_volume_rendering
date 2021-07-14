@@ -4,16 +4,17 @@
  * Leonardo Quatrin Campagnolo
  * . campagnolo.lq@gmail.com
 **/
-#include <volvis_utils/datamanager.h>
+#include "datamanager.h"
+#include "defines.h"
 
 #include <fstream>
 #include <gl_utils/computeshader.h>
-#include <vis_utils/defines.h>
 #include <volvis_utils/utils.h>
 
 #include <volvis_utils/reader.h>
 
-#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/raw/Bonsai.1.256x256x256.raw"
+//#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/raw/Bonsai.1.256x256x256.raw"
+#define _DATA_VOLUME_PATH "S:/github/s_cpp_volume_rendering/data/vollib/Engine.pvm"
 #define _DATA_TRANSFER_FUNCTION "S:/github/s_cpp_volume_rendering/data/tf1dcp/bonsai_01.tf1d"
 
 namespace vis
@@ -145,7 +146,7 @@ namespace vis
 
     // Initialize compute shader
     gl::ComputeShader* cpshader = new gl::ComputeShader();
-    cpshader->SetShaderFile(MAKE_STR(CMAKE_VOLVIS_UTILS_PATH_TO_SHADER)"/_gradient_shading/sobelfeldman_generator.comp");
+    cpshader->SetShaderFile(CPPVOLREND_DIR"structured/_common_shaders/sobelfeldman_generator.comp");
     cpshader->LoadAndLink();
     cpshader->Bind();
     
