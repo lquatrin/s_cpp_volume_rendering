@@ -10,18 +10,9 @@ add_definitions(-DCMAKE_PATH_OUTPUT_DIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 set(PATH_TO_APP_FOLDER ${CMAKE_SOURCE_DIR}/cppvolrend/)
 add_definitions(-DCMAKE_PATH_TO_APP_FOLDER=${PATH_TO_APP_FOLDER})
 
-set(PATH_TO_INCLUDE ${CMAKE_SOURCE_DIR}/include/)
-add_definitions(-DCMAKE_PATH_TO_INCLUDE=${PATH_TO_INCLUDE})
-
-set(PATH_TO_DATA_FOLDER ${CMAKE_SOURCE_DIR}/data/)
-add_definitions(-DCMAKE_PATH_TO_DATA_FOLDER=${PATH_TO_DATA_FOLDER})
-
 # add the executable to be available at ide
 add_executable(cppvolrend
                main.cpp                                                        defines.h
-               app_freeglut.cpp                                                app_freeglut.h
-               app_glfw.cpp                                                    app_glfw.h
-               renderingmanager.cpp                                            renderingmanager.h
                datamanager.cpp                                                 datamanager.h
                renderingparameters.cpp                                         renderingparameters.h
                renderoutputframe.cpp                                           renderoutputframe.h
@@ -35,7 +26,6 @@ link_directories(${OPENGL_gl_LIBRARY})
 # . Debug
 target_link_libraries(cppvolrend debug ${OPENGL_gl_LIBRARY})
 target_link_libraries(cppvolrend debug freeglut/freeglut)
-target_link_libraries(cppvolrend debug glfw/debug/glfw3)
 target_link_libraries(cppvolrend debug glew/glew32s)
 target_link_libraries(cppvolrend debug glew/glew32)
 target_link_libraries(cppvolrend debug file_utils)
@@ -44,7 +34,6 @@ target_link_libraries(cppvolrend debug volvis_utils)
 # . Release
 target_link_libraries(cppvolrend optimized ${OPENGL_gl_LIBRARY})
 target_link_libraries(cppvolrend optimized freeglut/freeglut)
-target_link_libraries(cppvolrend optimized glfw/release/glfw3)
 target_link_libraries(cppvolrend optimized glew/glew32s)
 target_link_libraries(cppvolrend optimized glew/glew32)
 target_link_libraries(cppvolrend optimized file_utils)
@@ -58,9 +47,7 @@ add_dependencies(cppvolrend volvis_utils)
 # . Debug
 file(COPY "${CMAKE_SOURCE_DIR}/lib/glew/glew32.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Debug")
 file(COPY "${CMAKE_SOURCE_DIR}/lib/freeglut/freeglut.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Debug")
-file(COPY "${CMAKE_SOURCE_DIR}/lib/glfw/glfw3.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Debug")
 
 # . Release
 file(COPY "${CMAKE_SOURCE_DIR}/lib/glew/glew32.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Release")
 file(COPY "${CMAKE_SOURCE_DIR}/lib/freeglut/freeglut.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Release")
-file(COPY "${CMAKE_SOURCE_DIR}/lib/glfw/glfw3.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin/Release")

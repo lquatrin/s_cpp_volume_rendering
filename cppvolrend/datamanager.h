@@ -72,8 +72,6 @@ namespace vis
     // Read data
     vis::GridVolume* GetCurrentGridVolume ();
     vis::StructuredGridVolume* GetCurrentStructuredVolume ();
-
-    int GetCurrentTransferFunctionIndex ();
     vis::TransferFunction* GetCurrentTransferFunction ();
 
     // Processed data
